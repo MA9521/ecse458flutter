@@ -55,21 +55,33 @@ class _MyHomePageState extends State<MyHomePage> {
   String _propofolVolumeField = '';
   String _durationProcedureField = '';
   String _primaryGasTypeValue = 'sevo';
-  String _primaryGasFlowField = '';
-  String _nitrousOxideFlowField = '';
+  String _primaryGasMAChField = '';
+  //String _primaryGasFlowField = '';
+  //String _nitrousOxideFlowField = '';
   String _syringeNumbersField = '';
+  String _patientWeightField = '';
   final String _emptyResult = '\n\n\n\n';
   String _result = '\n\n\n\n';
   final TextEditingController _propofolVolumeController =
       TextEditingController(text: '');
   final TextEditingController _durationProcedureController =
       TextEditingController(text: '');
-  final TextEditingController _primaryGasFlowController =
-      TextEditingController(text: '');
-  final TextEditingController _nitrousOxideFlowController =
+  // final TextEditingController _primaryGasFlowController =
+  //     TextEditingController(text: '');
+  // final TextEditingController _nitrousOxideFlowController =
+  //     TextEditingController(text: '');
+  final TextEditingController _primaryGasMAChController =
       TextEditingController(text: '');
   final TextEditingController _syringeNumbersController =
       TextEditingController(text: '');
+  final TextEditingController _patientWeightController =
+      TextEditingController(text: '');
+
+  final Map _gases = {
+    'sevo': ['Sevoflurane', 5.1985],
+    'iso': ['Isoflurane', 0.9833],
+    'desf': ['Desflurane', 15.5782]
+  };
 
   bool _isZeroOrPositive(String str) {
     return double.tryParse(str)! >= 0;
@@ -165,15 +177,19 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
     if (_administrationTypeValue == 'inhale' &&
-        _isZeroOrPositive(_durationProcedureField) &&
-        _isZeroOrPositive(_primaryGasFlowField) &&
-        _isZeroOrPositive(_nitrousOxideFlowField)) {
+        _isZeroOrPositive(_primaryGasMAChField) &&
+        _isZeroOrPositive(_patientWeightField)) {
+      double ghgImpact = _gases[_primaryGasTypeValue][1] *
+          double.tryParse(_primaryGasMAChField) *
+          double.tryParse(_patientWeightField) /
+          70.0;
+      double distance = _convertKgCO2ToKmDriven(ghgImpact);
       setState(() {
         _result =
-            '\nThe  0 L of Isoflurane used are responsible for 0 g CO\u2082-eq'
-            '\nThe  0 L of Nitrous Oxide are responsible for 0 g CO\u2082-eq'
-            '\nThe anesthesia procedure is responsible for 0 g CO\u2082-eq'
-            'which is equivalent to driving a gasoline car for 0 km.';
+            '\nThe  $_primaryGasMAChField MAC-h of ${_gases[_primaryGasTypeValue][0]} '
+            'on a $_patientWeightField-kg patient '
+            'is responsible for ${ghgImpact.toStringAsFixed(3)} kg CO\u2082-eq '
+            'which is equivalent to driving a gasoline car for ${distance.toStringAsFixed(3)} km.';
       });
     }
   }
@@ -250,26 +266,14 @@ class _MyHomePageState extends State<MyHomePage> {
                             DropdownButton<String>(
                               value: _primaryGasTypeValue,
                               //isDense: true,
-                              items: const <DropdownMenuItem<String>>[
-                                DropdownMenuItem<String>(
-                                  value: 'sevo',
-                                  child: Text(
-                                    'Sevoflurane',
-                                  ),
-                                ),
-                                DropdownMenuItem<String>(
-                                  value: 'iso',
-                                  child: Text(
-                                    'Isoflurane',
-                                  ),
-                                ),
-                                DropdownMenuItem<String>(
-                                  value: 'desf',
-                                  child: Text(
-                                    'Desfurane',
-                                  ),
-                                ),
-                              ],
+                              items: _gases.entries
+                                  .map((e) => DropdownMenuItem<String>(
+                                        value: e.key,
+                                        child: Text(
+                                          e.value[0],
+                                        ),
+                                      ))
+                                  .toList(),
                               onChanged: (String? newValue) {
                                 setState(() {
                                   _primaryGasTypeValue = newValue!;
@@ -280,7 +284,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           ],
                         )
                       : const SizedBox.shrink(),
-                  _administrationTypeValue != ''
+                  _administrationTypeValue == 'iv'
                       ? Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -362,12 +366,66 @@ class _MyHomePageState extends State<MyHomePage> {
                           ],
                         )
                       : const SizedBox.shrink(),
+                  // _administrationTypeValue == 'inhale'
+                  //     ? Row(
+                  //         mainAxisAlignment: MainAxisAlignment.center,
+                  //         crossAxisAlignment: CrossAxisAlignment.center,
+                  //         children: <Widget>[
+                  //           const Text('Primary Gas flow (L/min):     '),
+                  //           SizedBox(
+                  //             height: 42,
+                  //             width: 50,
+                  //             child: TextField(
+                  //               maxLines: 1,
+                  //               keyboardType:
+                  //                   const TextInputType.numberWithOptions(
+                  //                       decimal: true),
+                  //               onChanged: (String value) {
+                  //                 _primaryGasFlowField = value;
+                  //                 _clearResult();
+                  //               },
+                  //               onSubmitted: (String value) {
+                  //                 _primaryGasFlowField = value;
+                  //               },
+                  //               controller: _primaryGasFlowController,
+                  //             ),
+                  //           ),
+                  //         ],
+                  //       )
+                  //     : const SizedBox.shrink(),
+                  // _administrationTypeValue == 'inhale'
+                  //     ? Row(
+                  //         mainAxisAlignment: MainAxisAlignment.center,
+                  //         crossAxisAlignment: CrossAxisAlignment.center,
+                  //         children: <Widget>[
+                  //           const Text('Nitrous Oxide flow (L/min):     '),
+                  //           SizedBox(
+                  //             height: 42,
+                  //             width: 50,
+                  //             child: TextField(
+                  //               maxLines: 1,
+                  //               keyboardType:
+                  //                   const TextInputType.numberWithOptions(
+                  //                       decimal: true),
+                  //               onChanged: (String value) {
+                  //                 _nitrousOxideFlowField = value;
+                  //                 _clearResult();
+                  //               },
+                  //               onSubmitted: (String value) {
+                  //                 _nitrousOxideFlowField = value;
+                  //               },
+                  //               controller: _nitrousOxideFlowController,
+                  //             ),
+                  //           ),
+                  //         ],
+                  //       )
+                  //     : const SizedBox.shrink(),
                   _administrationTypeValue == 'inhale'
                       ? Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            const Text('Primary Gas flow (L/min):     '),
+                            const Text('MAC-h value:     '),
                             SizedBox(
                               height: 42,
                               width: 50,
@@ -377,13 +435,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                     const TextInputType.numberWithOptions(
                                         decimal: true),
                                 onChanged: (String value) {
-                                  _primaryGasFlowField = value;
+                                  _primaryGasMAChField = value;
                                   _clearResult();
                                 },
                                 onSubmitted: (String value) {
-                                  _primaryGasFlowField = value;
+                                  _primaryGasMAChField = value;
                                 },
-                                controller: _primaryGasFlowController,
+                                controller: _primaryGasMAChController,
                               ),
                             ),
                           ],
@@ -394,7 +452,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            const Text('Nitrous Oxide flow (L/min):     '),
+                            const Text('Patient weight (kg):     '),
                             SizedBox(
                               height: 42,
                               width: 50,
@@ -404,13 +462,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                     const TextInputType.numberWithOptions(
                                         decimal: true),
                                 onChanged: (String value) {
-                                  _nitrousOxideFlowField = value;
+                                  _patientWeightField = value;
                                   _clearResult();
                                 },
                                 onSubmitted: (String value) {
-                                  _nitrousOxideFlowField = value;
+                                  _patientWeightField = value;
                                 },
-                                controller: _nitrousOxideFlowController,
+                                controller: _patientWeightController,
                               ),
                             ),
                           ],
