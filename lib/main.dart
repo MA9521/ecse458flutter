@@ -150,6 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
         _isZeroOrPositive(_propofolVolumeField) &&
         int.tryParse(_syringeNumbersField)! >= 0) {
       double propofolNeeded = double.tryParse(_propofolVolumeField)!;
+      int syringesNumber = int.tryParse(_syringeNumbersField)!;
       List needBottlesAndWaste = _neededBottlesAndWaste(propofolNeeded);
       int mL20 = needBottlesAndWaste[0];
       int mL50 = needBottlesAndWaste[1];
@@ -160,20 +161,43 @@ class _MyHomePageState extends State<MyHomePage> {
         propofolNeeded,
         isUsed: true,
         duration: double.tryParse(_durationProcedureField)!,
-        nbSyringes: int.tryParse(_syringeNumbersField)!,
+        nbSyringes: syringesNumber,
       );
 
       double ghgWasted = _getPropofolImpact(propofolWasted);
       double totalGhg = ghgUsed + ghgWasted;
 
       double distance = _convertKgCO2ToKmDriven(totalGhg);
+
+      String neededBottlesSentence = '';
+      if (mL20 != 0 || mL50 != 0 || mL100 != 0) {
+        neededBottlesSentence =
+            '\nYou will need aa$mL20*20mL vials, aa$mL50*50mL vials, aa$mL100*100mL vials, '
+                .replaceAll(RegExp(r'aa0\*\d*mL vials, '), '')
+                .replaceAll('aa', '');
+        neededBottlesSentence = neededBottlesSentence.substring(
+            0, neededBottlesSentence.lastIndexOf(', '));
+      }
+
+      String neededPropofolSentence = distance != 0
+          ? '\nThe $propofolNeeded mL of propofol used in $syringesNumber syringes are responsible for ${ghgUsed.toStringAsFixed(3)} kg CO\u2082-eq'
+          : '';
+
+      String wastedPropofolSentence = propofolWasted != 0
+          ? '\nThe $propofolWasted mL of propofol wasted are responsible for ${ghgWasted.toStringAsFixed(3)} kg CO\u2082-eq'
+          : '';
+      String totalPropofolSentence = propofolWasted != 0
+          ? '\nThe total propofol (${propofolNeeded + propofolWasted} mL) and $syringesNumber syringes are responsible for ${totalGhg.toStringAsFixed(3)} kg CO\u2082-eq'
+          : '';
+      String drivenSentence = distance != 0
+          ? ' which is equivalent to driving a gasoline car for ${distance.toStringAsFixed(3)} km.'
+          : '';
       setState(() {
-        _result =
-            '\nYou will need $mL20*20mL vials, $mL50*50mL vials and $mL100*100mL vials'
-            '\nThe $propofolNeeded mL of propofol used are responsible for ${ghgUsed.toStringAsFixed(3)} kg CO\u2082-eq'
-            '\nThe $propofolWasted mL of propofol wasted are responsible for ${ghgWasted.toStringAsFixed(3)} kg CO\u2082-eq'
-            '\nThe total propofol (${propofolNeeded + propofolWasted} mL) is responsible for ${totalGhg.toStringAsFixed(3)} kg CO\u2082-eq'
-            ' which is equivalent to driving a gasoline car for ${distance.toStringAsFixed(3)} km.';
+        _result = neededBottlesSentence +
+            neededPropofolSentence +
+            wastedPropofolSentence +
+            totalPropofolSentence +
+            drivenSentence;
       });
     }
     if (_administrationTypeValue == 'inhale' &&
@@ -185,11 +209,12 @@ class _MyHomePageState extends State<MyHomePage> {
           70.0;
       double distance = _convertKgCO2ToKmDriven(ghgImpact);
       setState(() {
-        _result =
-            '\nThe  $_primaryGasMAChField MAC-h of ${_gases[_primaryGasTypeValue][0]} '
-            'on a $_patientWeightField-kg patient '
-            'is responsible for ${ghgImpact.toStringAsFixed(3)} kg CO\u2082-eq '
-            'which is equivalent to driving a gasoline car for ${distance.toStringAsFixed(3)} km.';
+        _result = distance == 0
+            ? ''
+            : '\nThe  $_primaryGasMAChField MAC-h of ${_gases[_primaryGasTypeValue][0]} '
+                'on a $_patientWeightField-kg patient '
+                'is responsible for ${ghgImpact.toStringAsFixed(3)} kg CO\u2082-eq '
+                'which is equivalent to driving a gasoline car for ${distance.toStringAsFixed(3)} km.';
       });
     }
   }
