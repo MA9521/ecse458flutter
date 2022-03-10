@@ -228,288 +228,300 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: _selectedBarIndex == 1
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const <Widget>[
-                  Text(
-                    'A quick calculator to estimate the GHG emissions of anesthesia procedures.\n\nThis app was developed by Veduren Rajaratnam and Mostafa Abdelwahab under the suprevision of Dr. Thomas Hemmerling',
-                  ),
-                ],
-              )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Row(
+      body: Stack(
+        children: <Widget>[
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/background.jpg"),
+                fit: BoxFit.fill,
+              ),
+            ),
+          ),
+          Center(
+            // Center is a layout widget. It takes a single child and positions it
+            // in the middle of the parent.
+            child: _selectedBarIndex == 1
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const <Widget>[
+                      Text(
+                        'A quick calculator to estimate the GHG emissions of anesthesia procedures.\n\nThis app was developed by Veduren Rajaratnam and Mostafa Abdelwahab under the suprevision of Dr. Thomas Hemmerling',
+                      ),
+                    ],
+                  )
+                : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      const Text('Administration:     '),
-                      DropdownButton<String>(
-                        value: _administrationTypeValue,
-                        isDense: true,
-                        items: const <DropdownMenuItem<String>>[
-                          DropdownMenuItem<String>(
-                            value: '',
-                            child: Text(
-                              '',
-                            ),
-                          ),
-                          DropdownMenuItem<String>(
-                            value: 'iv',
-                            child: Text(
-                              'IV (Propofol)',
-                            ),
-                          ),
-                          DropdownMenuItem<String>(
-                            value: 'inhale',
-                            child: Text(
-                              'Inhalative',
-                            ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          const Text('Administration:     '),
+                          DropdownButton<String>(
+                            value: _administrationTypeValue,
+                            isDense: true,
+                            items: const <DropdownMenuItem<String>>[
+                              DropdownMenuItem<String>(
+                                value: '',
+                                child: Text(
+                                  '',
+                                ),
+                              ),
+                              DropdownMenuItem<String>(
+                                value: 'iv',
+                                child: Text(
+                                  'IV (Propofol)',
+                                ),
+                              ),
+                              DropdownMenuItem<String>(
+                                value: 'inhale',
+                                child: Text(
+                                  'Inhalative',
+                                ),
+                              ),
+                            ],
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                _administrationTypeValue = newValue!;
+                                _result = _emptyResult;
+                              });
+                            },
                           ),
                         ],
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            _administrationTypeValue = newValue!;
-                            _result = _emptyResult;
-                          });
-                        },
                       ),
+                      _administrationTypeValue == 'inhale'
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                const Text('Primary Gas:          '),
+                                DropdownButton<String>(
+                                  value: _primaryGasTypeValue,
+                                  //isDense: true,
+                                  items: _gases.entries
+                                      .map((e) => DropdownMenuItem<String>(
+                                            value: e.key,
+                                            child: Text(
+                                              e.value[0],
+                                            ),
+                                          ))
+                                      .toList(),
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      _primaryGasTypeValue = newValue!;
+                                      _result = _emptyResult;
+                                    });
+                                  },
+                                ),
+                              ],
+                            )
+                          : const SizedBox.shrink(),
+                      _administrationTypeValue == 'iv'
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                const Text(
+                                    'Duration of the procedure (minutes):     '),
+                                SizedBox(
+                                  height: 42,
+                                  width: 50,
+                                  child: TextField(
+                                    maxLines: 1,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                            decimal: true),
+                                    onChanged: (String value) {
+                                      _durationProcedureField = value;
+                                      _clearResult();
+                                    },
+                                    onSubmitted: (String value) {
+                                      _durationProcedureField = value;
+                                    },
+                                    controller: _durationProcedureController,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : const SizedBox.shrink(),
+                      _administrationTypeValue == 'iv'
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                const Text(
+                                    'Volume of administered propofol (mL):     '),
+                                SizedBox(
+                                  height: 42,
+                                  width: 50,
+                                  child: TextField(
+                                    maxLines: 1,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                            decimal: true),
+                                    onChanged: (String value) {
+                                      _propofolVolumeField = value;
+                                      _clearResult();
+                                    },
+                                    onSubmitted: (String value) {
+                                      _propofolVolumeField = value;
+                                    },
+                                    controller: _propofolVolumeController,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : const SizedBox.shrink(),
+                      _administrationTypeValue == 'iv'
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                const Text('Number of syringes:        '),
+                                SizedBox(
+                                  height: 42,
+                                  width: 50,
+                                  child: TextField(
+                                    maxLines: 1,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(),
+                                    onChanged: (String value) {
+                                      _syringeNumbersField = value;
+                                      _clearResult();
+                                    },
+                                    onSubmitted: (String value) {
+                                      _syringeNumbersField = value;
+                                    },
+                                    controller: _syringeNumbersController,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : const SizedBox.shrink(),
+                      // _administrationTypeValue == 'inhale'
+                      //     ? Row(
+                      //         mainAxisAlignment: MainAxisAlignment.center,
+                      //         crossAxisAlignment: CrossAxisAlignment.center,
+                      //         children: <Widget>[
+                      //           const Text('Primary Gas flow (L/min):     '),
+                      //           SizedBox(
+                      //             height: 42,
+                      //             width: 50,
+                      //             child: TextField(
+                      //               maxLines: 1,
+                      //               keyboardType:
+                      //                   const TextInputType.numberWithOptions(
+                      //                       decimal: true),
+                      //               onChanged: (String value) {
+                      //                 _primaryGasFlowField = value;
+                      //                 _clearResult();
+                      //               },
+                      //               onSubmitted: (String value) {
+                      //                 _primaryGasFlowField = value;
+                      //               },
+                      //               controller: _primaryGasFlowController,
+                      //             ),
+                      //           ),
+                      //         ],
+                      //       )
+                      //     : const SizedBox.shrink(),
+                      // _administrationTypeValue == 'inhale'
+                      //     ? Row(
+                      //         mainAxisAlignment: MainAxisAlignment.center,
+                      //         crossAxisAlignment: CrossAxisAlignment.center,
+                      //         children: <Widget>[
+                      //           const Text('Nitrous Oxide flow (L/min):     '),
+                      //           SizedBox(
+                      //             height: 42,
+                      //             width: 50,
+                      //             child: TextField(
+                      //               maxLines: 1,
+                      //               keyboardType:
+                      //                   const TextInputType.numberWithOptions(
+                      //                       decimal: true),
+                      //               onChanged: (String value) {
+                      //                 _nitrousOxideFlowField = value;
+                      //                 _clearResult();
+                      //               },
+                      //               onSubmitted: (String value) {
+                      //                 _nitrousOxideFlowField = value;
+                      //               },
+                      //               controller: _nitrousOxideFlowController,
+                      //             ),
+                      //           ),
+                      //         ],
+                      //       )
+                      //     : const SizedBox.shrink(),
+                      _administrationTypeValue == 'inhale'
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                const Text('MAC-h value:     '),
+                                SizedBox(
+                                  height: 42,
+                                  width: 50,
+                                  child: TextField(
+                                    maxLines: 1,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                            decimal: true),
+                                    onChanged: (String value) {
+                                      _primaryGasMAChField = value;
+                                      _clearResult();
+                                    },
+                                    onSubmitted: (String value) {
+                                      _primaryGasMAChField = value;
+                                    },
+                                    controller: _primaryGasMAChController,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : const SizedBox.shrink(),
+                      _administrationTypeValue == 'inhale'
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                const Text('Patient weight (kg):     '),
+                                SizedBox(
+                                  height: 42,
+                                  width: 50,
+                                  child: TextField(
+                                    maxLines: 1,
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                            decimal: true),
+                                    onChanged: (String value) {
+                                      _patientWeightField = value;
+                                      _clearResult();
+                                    },
+                                    onSubmitted: (String value) {
+                                      _patientWeightField = value;
+                                    },
+                                    controller: _patientWeightController,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : const SizedBox.shrink(),
+                      _administrationTypeValue != ''
+                          ? ElevatedButton(
+                              onPressed: _onPressedCompute,
+                              child: const Text('Compute'),
+                            )
+                          : const SizedBox.shrink(),
+                      _administrationTypeValue != ''
+                          ? Text(_result)
+                          : const SizedBox.shrink(),
                     ],
                   ),
-                  _administrationTypeValue == 'inhale'
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            const Text('Primary Gas:          '),
-                            DropdownButton<String>(
-                              value: _primaryGasTypeValue,
-                              //isDense: true,
-                              items: _gases.entries
-                                  .map((e) => DropdownMenuItem<String>(
-                                        value: e.key,
-                                        child: Text(
-                                          e.value[0],
-                                        ),
-                                      ))
-                                  .toList(),
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  _primaryGasTypeValue = newValue!;
-                                  _result = _emptyResult;
-                                });
-                              },
-                            ),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
-                  _administrationTypeValue == 'iv'
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            const Text(
-                                'Duration of the procedure (minutes):     '),
-                            SizedBox(
-                              height: 42,
-                              width: 50,
-                              child: TextField(
-                                maxLines: 1,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true),
-                                onChanged: (String value) {
-                                  _durationProcedureField = value;
-                                  _clearResult();
-                                },
-                                onSubmitted: (String value) {
-                                  _durationProcedureField = value;
-                                },
-                                controller: _durationProcedureController,
-                              ),
-                            ),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
-                  _administrationTypeValue == 'iv'
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            const Text(
-                                'Volume of administered propofol (mL):     '),
-                            SizedBox(
-                              height: 42,
-                              width: 50,
-                              child: TextField(
-                                maxLines: 1,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true),
-                                onChanged: (String value) {
-                                  _propofolVolumeField = value;
-                                  _clearResult();
-                                },
-                                onSubmitted: (String value) {
-                                  _propofolVolumeField = value;
-                                },
-                                controller: _propofolVolumeController,
-                              ),
-                            ),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
-                  _administrationTypeValue == 'iv'
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            const Text('Number of syringes:        '),
-                            SizedBox(
-                              height: 42,
-                              width: 50,
-                              child: TextField(
-                                maxLines: 1,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(),
-                                onChanged: (String value) {
-                                  _syringeNumbersField = value;
-                                  _clearResult();
-                                },
-                                onSubmitted: (String value) {
-                                  _syringeNumbersField = value;
-                                },
-                                controller: _syringeNumbersController,
-                              ),
-                            ),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
-                  // _administrationTypeValue == 'inhale'
-                  //     ? Row(
-                  //         mainAxisAlignment: MainAxisAlignment.center,
-                  //         crossAxisAlignment: CrossAxisAlignment.center,
-                  //         children: <Widget>[
-                  //           const Text('Primary Gas flow (L/min):     '),
-                  //           SizedBox(
-                  //             height: 42,
-                  //             width: 50,
-                  //             child: TextField(
-                  //               maxLines: 1,
-                  //               keyboardType:
-                  //                   const TextInputType.numberWithOptions(
-                  //                       decimal: true),
-                  //               onChanged: (String value) {
-                  //                 _primaryGasFlowField = value;
-                  //                 _clearResult();
-                  //               },
-                  //               onSubmitted: (String value) {
-                  //                 _primaryGasFlowField = value;
-                  //               },
-                  //               controller: _primaryGasFlowController,
-                  //             ),
-                  //           ),
-                  //         ],
-                  //       )
-                  //     : const SizedBox.shrink(),
-                  // _administrationTypeValue == 'inhale'
-                  //     ? Row(
-                  //         mainAxisAlignment: MainAxisAlignment.center,
-                  //         crossAxisAlignment: CrossAxisAlignment.center,
-                  //         children: <Widget>[
-                  //           const Text('Nitrous Oxide flow (L/min):     '),
-                  //           SizedBox(
-                  //             height: 42,
-                  //             width: 50,
-                  //             child: TextField(
-                  //               maxLines: 1,
-                  //               keyboardType:
-                  //                   const TextInputType.numberWithOptions(
-                  //                       decimal: true),
-                  //               onChanged: (String value) {
-                  //                 _nitrousOxideFlowField = value;
-                  //                 _clearResult();
-                  //               },
-                  //               onSubmitted: (String value) {
-                  //                 _nitrousOxideFlowField = value;
-                  //               },
-                  //               controller: _nitrousOxideFlowController,
-                  //             ),
-                  //           ),
-                  //         ],
-                  //       )
-                  //     : const SizedBox.shrink(),
-                  _administrationTypeValue == 'inhale'
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            const Text('MAC-h value:     '),
-                            SizedBox(
-                              height: 42,
-                              width: 50,
-                              child: TextField(
-                                maxLines: 1,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true),
-                                onChanged: (String value) {
-                                  _primaryGasMAChField = value;
-                                  _clearResult();
-                                },
-                                onSubmitted: (String value) {
-                                  _primaryGasMAChField = value;
-                                },
-                                controller: _primaryGasMAChController,
-                              ),
-                            ),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
-                  _administrationTypeValue == 'inhale'
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            const Text('Patient weight (kg):     '),
-                            SizedBox(
-                              height: 42,
-                              width: 50,
-                              child: TextField(
-                                maxLines: 1,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true),
-                                onChanged: (String value) {
-                                  _patientWeightField = value;
-                                  _clearResult();
-                                },
-                                onSubmitted: (String value) {
-                                  _patientWeightField = value;
-                                },
-                                controller: _patientWeightController,
-                              ),
-                            ),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
-                  _administrationTypeValue != ''
-                      ? ElevatedButton(
-                          onPressed: _onPressedCompute,
-                          child: const Text('Compute'),
-                        )
-                      : const SizedBox.shrink(),
-                  _administrationTypeValue != ''
-                      ? Text(_result)
-                      : const SizedBox.shrink(),
-                ],
-              ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
