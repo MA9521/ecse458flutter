@@ -76,6 +76,9 @@ class _MyHomePageState extends State<MyHomePage> {
       TextEditingController(text: '');
   final TextEditingController _patientWeightController =
       TextEditingController(text: '');
+  double _distanceTravelled = 0.0;
+  double _screenWidth = 0.0;
+  double _animationWidth = 0.0;
 
   final Map _gases = {
     'sevo': ['Sevoflurane', 5.1985],
@@ -90,6 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _clearResult() {
     if (_result != _emptyResult) {
       setState(() {
+        _animationWidth = 0.0;
         _result = _emptyResult;
       });
     }
@@ -167,7 +171,7 @@ class _MyHomePageState extends State<MyHomePage> {
       double ghgWasted = _getPropofolImpact(propofolWasted);
       double totalGhg = ghgUsed + ghgWasted;
 
-      double distance = _convertKgCO2ToKmDriven(totalGhg);
+      _distanceTravelled = _convertKgCO2ToKmDriven(totalGhg);
 
       String neededBottlesSentence = '';
       if (mL20 != 0 || mL50 != 0 || mL100 != 0) {
@@ -179,7 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
             0, neededBottlesSentence.lastIndexOf(', '));
       }
 
-      String neededPropofolSentence = distance != 0
+      String neededPropofolSentence = _distanceTravelled != 0
           ? '\nThe $propofolNeeded mL of propofol used in $syringesNumber syringes are responsible for ${ghgUsed.toStringAsFixed(3)} kg CO\u2082-eq'
           : '';
 
@@ -189,10 +193,11 @@ class _MyHomePageState extends State<MyHomePage> {
       String totalPropofolSentence = propofolWasted != 0
           ? '\nThe total propofol (${propofolNeeded + propofolWasted} mL) and $syringesNumber syringes are responsible for ${totalGhg.toStringAsFixed(3)} kg CO\u2082-eq'
           : '';
-      String drivenSentence = distance != 0
-          ? ' which is equivalent to driving a gasoline car for ${distance.toStringAsFixed(3)} km.'
+      String drivenSentence = _distanceTravelled != 0
+          ? ' which is equivalent to driving a gasoline car for ${_distanceTravelled.toStringAsFixed(3)} km.'
           : '';
       setState(() {
+        _animationWidth = _screenWidth - 80;
         _result = neededBottlesSentence +
             neededPropofolSentence +
             wastedPropofolSentence +
@@ -207,14 +212,15 @@ class _MyHomePageState extends State<MyHomePage> {
           double.tryParse(_primaryGasMAChField) *
           double.tryParse(_patientWeightField) /
           70.0;
-      double distance = _convertKgCO2ToKmDriven(ghgImpact);
+      _distanceTravelled = _convertKgCO2ToKmDriven(ghgImpact);
       setState(() {
-        _result = distance == 0
+        _animationWidth = _screenWidth - 80;
+        _result = _distanceTravelled == 0
             ? ''
             : '\nThe  $_primaryGasMAChField MAC-h of ${_gases[_primaryGasTypeValue][0]} '
                 'on a $_patientWeightField-kg patient '
                 'is responsible for ${ghgImpact.toStringAsFixed(3)} kg CO\u2082-eq '
-                'which is equivalent to driving a gasoline car for ${distance.toStringAsFixed(3)} km.';
+                'which is equivalent to driving a gasoline car for ${_distanceTravelled.toStringAsFixed(3)} km.';
       });
     }
   }
@@ -227,6 +233,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+    _screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Stack(
         children: <Widget>[
@@ -285,6 +292,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             ],
                             onChanged: (String? newValue) {
                               setState(() {
+                                _animationWidth = 0.0;
                                 _administrationTypeValue = newValue!;
                                 _result = _emptyResult;
                               });
@@ -311,6 +319,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                       .toList(),
                                   onChanged: (String? newValue) {
                                     setState(() {
+                                      _animationWidth = 0.0;
                                       _primaryGasTypeValue = newValue!;
                                       _result = _emptyResult;
                                     });
@@ -518,6 +527,36 @@ class _MyHomePageState extends State<MyHomePage> {
                       _administrationTypeValue != ''
                           ? Text(_result)
                           : const SizedBox.shrink(),
+                      _administrationTypeValue != '' &&
+                              _distanceTravelled > 0 &&
+                              _result != _emptyResult
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                  const Text('0km'),
+                                  const Spacer(),
+                                  Text(
+                                      '${_distanceTravelled.toStringAsFixed(3)}km')
+                                ])
+                          : const SizedBox.shrink(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          AnimatedContainer(
+                            width: _animationWidth,
+                            duration: const Duration(seconds: 3),
+                            curve: Curves.linearToEaseOut,
+                          ),
+                          _administrationTypeValue != '' &&
+                                  _distanceTravelled > 0 &&
+                                  _result != _emptyResult
+                              ? const Image(
+                                  image: AssetImage("assets/images/car.png"),
+                                  width: 40,
+                                )
+                              : const SizedBox.shrink(),
+                        ],
+                      ),
                     ],
                   ),
           ),
@@ -538,6 +577,7 @@ class _MyHomePageState extends State<MyHomePage> {
         selectedItemColor: Colors.amber[800],
         onTap: (int index) {
           setState(() {
+            _animationWidth = 0.0;
             _result = _emptyResult;
             _selectedBarIndex = index;
           });
