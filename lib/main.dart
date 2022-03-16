@@ -79,12 +79,11 @@ class _MyHomePageState extends State<MyHomePage> {
   double _distanceTravelled = 0.0;
   double _screenWidth = 0.0;
   double _animationWidth = 0.0;
-  bool _firstAnimation = true;
 
   final Map _gases = {
-    'sevo': ['Sevoflurane', 5.1985],
-    'iso': ['Isoflurane', 0.9833],
-    'desf': ['Desflurane', 15.5782]
+    'sevo': ['Sevoflurane', 49.3115],
+    'iso': ['Isoflurane', 23.0553],
+    'desf': ['Desflurane', 37.6502]
   };
 
   bool _isZeroOrPositive(String str) {
@@ -293,12 +292,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             ],
                             onChanged: (String? newValue) {
                               setState(() {
-                                if (_firstAnimation) {
-                                  _animationWidth = _screenWidth - 40;
-                                  _firstAnimation = false;
-                                } else {
-                                  _animationWidth = 0.0;
-                                }
+                                _animationWidth = 0.0;
                                 _administrationTypeValue = newValue!;
                                 _result = _emptyResult;
                               });
@@ -539,7 +533,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           children: <Widget>[
                             AnimatedContainer(
                               width: _animationWidth,
-                              duration: const Duration(seconds: 3),
+                              duration: const Duration(seconds: 6),
                               curve: Curves.linearToEaseOut,
                             ),
                             Visibility(
