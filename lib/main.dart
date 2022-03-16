@@ -79,6 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
   double _distanceTravelled = 0.0;
   double _screenWidth = 0.0;
   double _animationWidth = 0.0;
+  bool _firstAnimation = true;
 
   final Map _gases = {
     'sevo': ['Sevoflurane', 5.1985],
@@ -91,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _clearResult() {
-    if (_result != _emptyResult) {
+    if (_result != _emptyResult || _animationWidth != 0.0) {
       setState(() {
         _animationWidth = 0.0;
         _result = _emptyResult;
@@ -197,7 +198,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ? ' which is equivalent to driving a gasoline car for ${_distanceTravelled.toStringAsFixed(3)} km.'
           : '';
       setState(() {
-        _animationWidth = _screenWidth - 80;
+        _animationWidth = _screenWidth - 40;
         _result = neededBottlesSentence +
             neededPropofolSentence +
             wastedPropofolSentence +
@@ -214,7 +215,7 @@ class _MyHomePageState extends State<MyHomePage> {
           70.0;
       _distanceTravelled = _convertKgCO2ToKmDriven(ghgImpact);
       setState(() {
-        _animationWidth = _screenWidth - 80;
+        _animationWidth = _screenWidth - 40;
         _result = _distanceTravelled == 0
             ? ''
             : '\nThe  $_primaryGasMAChField MAC-h of ${_gases[_primaryGasTypeValue][0]} '
@@ -292,7 +293,12 @@ class _MyHomePageState extends State<MyHomePage> {
                             ],
                             onChanged: (String? newValue) {
                               setState(() {
-                                _animationWidth = 0.0;
+                                if (_firstAnimation) {
+                                  _animationWidth = _screenWidth - 40;
+                                  _firstAnimation = false;
+                                } else {
+                                  _animationWidth = 0.0;
+                                }
                                 _administrationTypeValue = newValue!;
                                 _result = _emptyResult;
                               });
@@ -527,36 +533,41 @@ class _MyHomePageState extends State<MyHomePage> {
                       _administrationTypeValue != ''
                           ? Text(_result)
                           : const SizedBox.shrink(),
+                      SafeArea(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            AnimatedContainer(
+                              width: _animationWidth,
+                              duration: const Duration(seconds: 3),
+                              curve: Curves.linearToEaseOut,
+                            ),
+                            Visibility(
+                              child: const Image(
+                                image: AssetImage("assets/images/car.png"),
+                                width: 40,
+                              ),
+                              visible: _administrationTypeValue != '' &&
+                                  _distanceTravelled > 0 &&
+                                  _result != _emptyResult,
+                            ),
+                          ],
+                        ),
+                      ),
                       _administrationTypeValue != '' &&
                               _distanceTravelled > 0 &&
                               _result != _emptyResult
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: <Widget>[
-                                  const Text('0km'),
-                                  const Spacer(),
-                                  Text(
-                                      '${_distanceTravelled.toStringAsFixed(3)}km')
-                                ])
+                          ? SafeArea(
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    const Text('0km'),
+                                    const Spacer(),
+                                    Text(
+                                        '${_distanceTravelled.toStringAsFixed(3)}km'),
+                                  ]),
+                            )
                           : const SizedBox.shrink(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          AnimatedContainer(
-                            width: _animationWidth,
-                            duration: const Duration(seconds: 3),
-                            curve: Curves.linearToEaseOut,
-                          ),
-                          _administrationTypeValue != '' &&
-                                  _distanceTravelled > 0 &&
-                                  _result != _emptyResult
-                              ? const Image(
-                                  image: AssetImage("assets/images/car.png"),
-                                  width: 40,
-                                )
-                              : const SizedBox.shrink(),
-                        ],
-                      ),
                     ],
                   ),
           ),
