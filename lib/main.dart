@@ -276,6 +276,7 @@ class MyHomePageState extends State<MyHomePage> {
                         children: <Widget>[
                           const Text('Administration:     '),
                           DropdownButton<String>(
+                            key: const ValueKey('administrationdropdown'),
                             value: _administrationTypeValue,
                             isDense: true,
                             items: const <DropdownMenuItem<String>>[
@@ -347,6 +348,7 @@ class MyHomePageState extends State<MyHomePage> {
                                   height: 42,
                                   width: 50,
                                   child: TextField(
+                                    key: const ValueKey('durationfield'),
                                     maxLines: 1,
                                     keyboardType:
                                         const TextInputType.numberWithOptions(
@@ -375,6 +377,7 @@ class MyHomePageState extends State<MyHomePage> {
                                   height: 42,
                                   width: 50,
                                   child: TextField(
+                                    key: const ValueKey('volumefield'),
                                     maxLines: 1,
                                     keyboardType:
                                         const TextInputType.numberWithOptions(
@@ -402,6 +405,7 @@ class MyHomePageState extends State<MyHomePage> {
                                   height: 42,
                                   width: 50,
                                   child: TextField(
+                                    key: const ValueKey('nbsyringesfield'),
                                     maxLines: 1,
                                     keyboardType:
                                         const TextInputType.numberWithOptions(),
@@ -528,6 +532,7 @@ class MyHomePageState extends State<MyHomePage> {
                           : const SizedBox.shrink(),
                       _administrationTypeValue != ''
                           ? ElevatedButton(
+                              key: const ValueKey('computebutton'),
                               onPressed: _onPressedCompute,
                               child: const Text('Compute'),
                             )
