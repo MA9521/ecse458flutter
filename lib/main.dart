@@ -46,10 +46,10 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MyHomePage> createState() => MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class MyHomePageState extends State<MyHomePage> {
   int _selectedBarIndex = 0;
   String _administrationTypeValue = '';
   String _propofolVolumeField = '';
@@ -99,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  List _neededBottlesAndWaste(double volumeNeeded) {
+  List neededBottlesAndWaste(double volumeNeeded) {
     int ceilVolume = (volumeNeeded / 10.0).ceil() * 10; //mutiple of 10
     int mL20 = 0;
     int mL50 = 0;
@@ -134,7 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // return in kgco2eq .... volume in mL .... duration in minutes
-  double _getPropofolImpact(double volume,
+  double getPropofolImpact(double volume,
       {bool isUsed = false, double duration = 0.0, int nbSyringes = 0}) {
     // LCA assesment minus electricty minus syringe..... 1MAC-h for 70 kg patient is 60 mL
     double ghgImpact = 0.00543166666 * volume + 0.6795 * nbSyringes;
@@ -144,7 +144,15 @@ class _MyHomePageState extends State<MyHomePage> {
     return ghgImpact;
   }
 
-  double _convertKgCO2ToKmDriven(double ghgImpact) {
+  double getGasImpact(
+      String primaryGasTypeValue, double primaryGasMACh, double patientWeight) {
+    return _gases[primaryGasTypeValue][1] *
+        primaryGasMACh *
+        patientWeight /
+        70.0;
+  }
+
+  double convertKgCO2ToKmDriven(double ghgImpact) {
     return 5.57413600892 * ghgImpact;
   }
 
@@ -155,23 +163,23 @@ class _MyHomePageState extends State<MyHomePage> {
         int.tryParse(_syringeNumbersField)! >= 0) {
       double propofolNeeded = double.tryParse(_propofolVolumeField)!;
       int syringesNumber = int.tryParse(_syringeNumbersField)!;
-      List needBottlesAndWaste = _neededBottlesAndWaste(propofolNeeded);
+      List needBottlesAndWaste = neededBottlesAndWaste(propofolNeeded);
       int mL20 = needBottlesAndWaste[0];
       int mL50 = needBottlesAndWaste[1];
       int mL100 = needBottlesAndWaste[2];
       double propofolWasted = needBottlesAndWaste[3];
 
-      double ghgUsed = _getPropofolImpact(
+      double ghgUsed = getPropofolImpact(
         propofolNeeded,
         isUsed: true,
         duration: double.tryParse(_durationProcedureField)!,
         nbSyringes: syringesNumber,
       );
 
-      double ghgWasted = _getPropofolImpact(propofolWasted);
+      double ghgWasted = getPropofolImpact(propofolWasted);
       double totalGhg = ghgUsed + ghgWasted;
 
-      _distanceTravelled = _convertKgCO2ToKmDriven(totalGhg);
+      _distanceTravelled = convertKgCO2ToKmDriven(totalGhg);
 
       String neededBottlesSentence = '';
       if (mL20 != 0 || mL50 != 0 || mL100 != 0) {
@@ -208,11 +216,11 @@ class _MyHomePageState extends State<MyHomePage> {
     if (_administrationTypeValue == 'inhale' &&
         _isZeroOrPositive(_primaryGasMAChField) &&
         _isZeroOrPositive(_patientWeightField)) {
-      double ghgImpact = _gases[_primaryGasTypeValue][1] *
-          double.tryParse(_primaryGasMAChField) *
-          double.tryParse(_patientWeightField) /
-          70.0;
-      _distanceTravelled = _convertKgCO2ToKmDriven(ghgImpact);
+      double ghgImpact = getGasImpact(
+          _primaryGasTypeValue,
+          double.tryParse(_primaryGasMAChField)!,
+          double.tryParse(_patientWeightField)!);
+      _distanceTravelled = convertKgCO2ToKmDriven(ghgImpact);
       setState(() {
         _animationWidth = _screenWidth - 40;
         _result = _distanceTravelled == 0
