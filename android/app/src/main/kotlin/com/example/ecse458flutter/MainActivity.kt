@@ -1,4 +1,4 @@
-package com.example.ecse458flutter
+package com.mostafaabdelwahab.ecse.capstone
 
 import io.flutter.embedding.android.FlutterActivity
 
