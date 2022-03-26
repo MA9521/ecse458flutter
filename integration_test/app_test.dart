@@ -13,7 +13,11 @@ void main() {
     app.main();
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const ValueKey('administrationdropdown')));
+    final administrationDropdown =
+        find.byKey(const ValueKey('administrationdropdown'));
+    await pumpUntilFound(tester, administrationDropdown,
+        timeout: const Duration(seconds: 30));
+    await tester.tap(administrationDropdown);
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('IV (Propofol)').last);

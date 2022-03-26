@@ -18,7 +18,7 @@ void main() {
           0.00543166666 * 265.5 + 0.6795 + 60 * 0.00009476);
     });
 
-    test('correctly determines the GHG impact of uwasted propofol', () {
+    test('correctly determines the GHG impact of wasted propofol', () {
       expect(MyHomePageState().getPropofolImpact(4.5), 0.00543166666 * 4.5);
     });
   });
