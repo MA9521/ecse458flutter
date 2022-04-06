@@ -76,6 +76,7 @@ class MyHomePageState extends State<MyHomePage> {
       TextEditingController(text: '');
   final TextEditingController _patientWeightController =
       TextEditingController(text: '');
+  final TextStyle _textStyle = const TextStyle(fontSize: 18);
   double _distanceTravelled = 0.0;
   double _screenWidth = 0.0;
   double _animationWidth = 0.0;
@@ -188,24 +189,25 @@ class MyHomePageState extends State<MyHomePage> {
                 .replaceAll(RegExp(r'aa0\*\d*mL vials, '), '')
                 .replaceAll('aa', '');
         neededBottlesSentence = neededBottlesSentence.substring(
-            0, neededBottlesSentence.lastIndexOf(', '));
+                0, neededBottlesSentence.lastIndexOf(', ')) +
+            '.';
       }
 
       String neededPropofolSentence = _distanceTravelled != 0
-          ? '\nThe $propofolNeeded mL of propofol used in $syringesNumber syringes are responsible for ${ghgUsed.toStringAsFixed(3)} kg CO\u2082-eq'
+          ? '\nThe $propofolNeeded mL of propofol used in $syringesNumber syringes are responsible for ${ghgUsed.toStringAsFixed(3)} kg CO\u2082-eq.'
           : '';
 
       String wastedPropofolSentence = propofolWasted != 0
-          ? '\nThe $propofolWasted mL of propofol wasted are responsible for ${ghgWasted.toStringAsFixed(3)} kg CO\u2082-eq'
+          ? '\nThe $propofolWasted mL of propofol wasted are responsible for ${ghgWasted.toStringAsFixed(3)} kg CO\u2082-eq.'
           : '';
       String totalPropofolSentence = propofolWasted != 0
-          ? '\nThe total propofol (${propofolNeeded + propofolWasted} mL) and $syringesNumber syringes are responsible for ${totalGhg.toStringAsFixed(3)} kg CO\u2082-eq'
+          ? '\nThe total propofol (${propofolNeeded + propofolWasted} mL) and $syringesNumber syringes are responsible for ${totalGhg.toStringAsFixed(3)} kg CO\u2082-eq.'
           : '';
       String drivenSentence = _distanceTravelled != 0
-          ? ' which is equivalent to driving a gasoline car for ${_distanceTravelled.toStringAsFixed(3)} km.'
+          ? ' This is equivalent to driving a gasoline car for ${_distanceTravelled.toStringAsFixed(3)} km.'
           : '';
       setState(() {
-        _animationWidth = _screenWidth - 40;
+        _animationWidth = 2 * _screenWidth / 3 - 45;
         _result = neededBottlesSentence +
             neededPropofolSentence +
             wastedPropofolSentence +
@@ -222,7 +224,7 @@ class MyHomePageState extends State<MyHomePage> {
           double.tryParse(_patientWeightField)!);
       _distanceTravelled = convertKgCO2ToKmDriven(ghgImpact);
       setState(() {
-        _animationWidth = _screenWidth - 40;
+        _animationWidth = 2 * _screenWidth / 3 - 45;
         _result = _distanceTravelled == 0
             ? ''
             : '\nThe  $_primaryGasMAChField MAC-h of ${_gases[_primaryGasTypeValue][0]} '
@@ -538,12 +540,18 @@ class MyHomePageState extends State<MyHomePage> {
                             )
                           : const SizedBox.shrink(),
                       _administrationTypeValue != ''
-                          ? Text(_result)
+                          ? Text(
+                              _result,
+                              style: _textStyle,
+                            )
                           : const SizedBox.shrink(),
                       SafeArea(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: <Widget>[
+                            Container(
+                              width: _screenWidth / 6,
+                            ),
                             AnimatedContainer(
                               width: _animationWidth,
                               duration: const Duration(seconds: 6),
@@ -552,7 +560,7 @@ class MyHomePageState extends State<MyHomePage> {
                             Visibility(
                               child: const Image(
                                 image: AssetImage("assets/images/car.png"),
-                                width: 40,
+                                width: 45,
                               ),
                               visible: _administrationTypeValue != '' &&
                                   _distanceTravelled > 0 &&
@@ -568,10 +576,21 @@ class MyHomePageState extends State<MyHomePage> {
                               child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: <Widget>[
-                                    const Text('0km'),
+                                    Container(
+                                      width: _screenWidth / 6,
+                                    ),
+                                    Text(
+                                      '0km',
+                                      style: _textStyle,
+                                    ),
                                     const Spacer(),
                                     Text(
-                                        '${_distanceTravelled.toStringAsFixed(3)}km'),
+                                      '${_distanceTravelled.toStringAsFixed(3)}km',
+                                      style: _textStyle,
+                                    ),
+                                    Container(
+                                      width: _screenWidth / 6,
+                                    ),
                                   ]),
                             )
                           : const SizedBox.shrink(),
