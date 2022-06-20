@@ -4,6 +4,9 @@ import 'package:ecse458flutter/main.dart';
 
 void main() {
   group('Propofol calculator', () {
+    test('correctly determines volume of needed propofol', () {
+      expect(MyHomePageState().getPropofolNeededVolume(10, 60, 70), 4.2);
+    });
     test('correctly determines number of bottles', () {
       expect(MyHomePageState().neededBottlesAndWaste(265.5), [1, 1, 2, 4.5]);
     });

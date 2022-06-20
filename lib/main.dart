@@ -52,7 +52,7 @@ class MyHomePage extends StatefulWidget {
 class MyHomePageState extends State<MyHomePage> {
   int _selectedBarIndex = 0;
   String _administrationTypeValue = '';
-  String _propofolVolumeField = '';
+  String _propofolConcentrationField = '';
   String _durationProcedureField = '';
   String _primaryGasTypeValue = 'sevo';
   String _primaryGasMAChField = '';
@@ -62,7 +62,7 @@ class MyHomePageState extends State<MyHomePage> {
   String _patientWeightField = '';
   final String _emptyResult = '\n\n\n\n';
   String _result = '\n\n\n\n';
-  final TextEditingController _propofolVolumeController =
+  final TextEditingController _propofolConcentrationController =
       TextEditingController(text: '');
   final TextEditingController _durationProcedureController =
       TextEditingController(text: '');
@@ -100,6 +100,11 @@ class MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  double getPropofolNeededVolume(double propofolConcentration,
+      double durationProcedure, double patientWeight) {
+    return propofolConcentration * patientWeight * durationProcedure / 10000.0;
+  }
+
   List neededBottlesAndWaste(double volumeNeeded) {
     int ceilVolume = (volumeNeeded / 10.0).ceil() * 10; //mutiple of 10
     int mL20 = 0;
@@ -130,7 +135,8 @@ class MyHomePageState extends State<MyHomePage> {
       mL20,
       mL50,
       mL100,
-      (20 * mL20 + 50 * mL50 + 100 * mL100).toDouble() - volumeNeeded
+      double.tryParse((20 * mL20 + 50 * mL50 + 100 * mL100 - volumeNeeded)
+          .toStringAsFixed(3))
     ];
   }
 
@@ -160,9 +166,14 @@ class MyHomePageState extends State<MyHomePage> {
   void _onPressedCompute() {
     if (_administrationTypeValue == 'iv' &&
         _isZeroOrPositive(_durationProcedureField) &&
-        _isZeroOrPositive(_propofolVolumeField) &&
+        _isZeroOrPositive(_propofolConcentrationField) &&
+        _isZeroOrPositive(_patientWeightField) &&
         int.tryParse(_syringeNumbersField)! >= 0) {
-      double propofolNeeded = double.tryParse(_propofolVolumeField)!;
+      double propofolNeeded = double.tryParse(getPropofolNeededVolume(
+              double.tryParse(_propofolConcentrationField)!,
+              double.tryParse(_durationProcedureField)!,
+              double.tryParse(_patientWeightField)!)
+          .toStringAsFixed(3))!;
       int syringesNumber = int.tryParse(_syringeNumbersField)!;
       List needBottlesAndWaste = neededBottlesAndWaste(propofolNeeded);
       int mL20 = needBottlesAndWaste[0];
@@ -204,7 +215,7 @@ class MyHomePageState extends State<MyHomePage> {
           ? '\nThe total propofol (${propofolNeeded + propofolWasted} mL) and $syringesNumber syringes are responsible for ${totalGhg.toStringAsFixed(3)} kg CO\u2082-eq.'
           : '';
       String drivenSentence = _distanceTravelled != 0
-          ? ' This is equivalent to driving a gasoline car for ${_distanceTravelled.toStringAsFixed(3)} km.'
+          ? ' This is equivalent to driving a gasoline car for ${_distanceTravelled.toStringAsFixed(3)} km (${(_distanceTravelled / 1.6).toStringAsFixed(3)} miles).'
           : '';
       setState(() {
         _animationWidth = 2 * _screenWidth / 3 - 45;
@@ -230,7 +241,7 @@ class MyHomePageState extends State<MyHomePage> {
             : '\nThe  $_primaryGasMAChField MAC-h of ${_gases[_primaryGasTypeValue][0]} '
                 'on a $_patientWeightField-kg patient '
                 'is responsible for ${ghgImpact.toStringAsFixed(3)} kg CO\u2082-eq '
-                'which is equivalent to driving a gasoline car for ${_distanceTravelled.toStringAsFixed(3)} km.';
+                'which is equivalent to driving a gasoline car for ${_distanceTravelled.toStringAsFixed(3)} km (${(_distanceTravelled / 1.6).toStringAsFixed(3)} miles).';
       });
     }
   }
@@ -374,24 +385,25 @@ class MyHomePageState extends State<MyHomePage> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
                                 const Text(
-                                    'Volume of administered propofol (mL):     '),
+                                    'Concentration of propofol (mcg/kg/min):   '),
                                 SizedBox(
                                   height: 42,
                                   width: 50,
                                   child: TextField(
-                                    key: const ValueKey('volumefield'),
+                                    key: const ValueKey('concentrationfield'),
                                     maxLines: 1,
                                     keyboardType:
                                         const TextInputType.numberWithOptions(
                                             decimal: true),
                                     onChanged: (String value) {
-                                      _propofolVolumeField = value;
+                                      _propofolConcentrationField = value;
                                       _clearResult();
                                     },
                                     onSubmitted: (String value) {
-                                      _propofolVolumeField = value;
+                                      _propofolConcentrationField = value;
                                     },
-                                    controller: _propofolVolumeController,
+                                    controller:
+                                        _propofolConcentrationController,
                                   ),
                                 ),
                               ],
@@ -505,7 +517,8 @@ class MyHomePageState extends State<MyHomePage> {
                               ],
                             )
                           : const SizedBox.shrink(),
-                      _administrationTypeValue == 'inhale'
+                      _administrationTypeValue == 'inhale' ||
+                              _administrationTypeValue == 'iv'
                           ? Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -515,6 +528,7 @@ class MyHomePageState extends State<MyHomePage> {
                                   height: 42,
                                   width: 50,
                                   child: TextField(
+                                    key: const ValueKey('weightfield'),
                                     maxLines: 1,
                                     keyboardType:
                                         const TextInputType.numberWithOptions(

@@ -27,13 +27,17 @@ void main() {
     await tester.tap(durationField);
     await tester.enterText(durationField, '60');
 
-    final volumeField = find.byKey(const ValueKey('volumefield'));
-    await tester.tap(volumeField);
-    await tester.enterText(volumeField, '265');
+    final concentrationField = find.byKey(const ValueKey('concentrationfield'));
+    await tester.tap(concentrationField);
+    await tester.enterText(concentrationField, '20');
 
     final nbSyringesField = find.byKey(const ValueKey('nbsyringesfield'));
     await tester.tap(nbSyringesField);
     await tester.enterText(nbSyringesField, '1');
+
+    final weightField = find.byKey(const ValueKey('weightfield'));
+    await tester.tap(weightField);
+    await tester.enterText(weightField, '70');
 
     expect(find.textContaining('You will need'), findsNothing);
 
@@ -44,8 +48,8 @@ void main() {
     expect(find.textContaining('You will need'), findsOneWidget);
     expect(
         find.textContaining(
-            'The total propofol (270 mL) and 1 syringes are responsible '
-            'for 2.152 kg CO'),
+            'The total propofol (20 mL) and 1 syringes are responsible '
+            'for 0.794 kg CO'),
         findsOneWidget);
   });
 }
