@@ -1,0 +1,1 @@
+This app is a simple calculator done for a course project. It does not store or use any of the information outside the app logic.
